@@ -43,13 +43,6 @@ where you will find
 
 KeycloakRails.configure do |config|
   ####################################################
-  # Rails app controllers to manage auth
-  # config.sessions_controller = 'sessions'
-  # config.registrations_controller = 'registrations'
-  # config.unlocks_controller = 'unlocks'
-  # config.passwords_controller = 'passwords'
-  # config.omniauth_controller = 'omniauth'
-  ####################################################
   # keyclaok rails need your user model name
   # config.user_model = 'user'
   ####################################################
