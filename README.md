@@ -1,0 +1,179 @@
+[![Gem Version](https://badge.fury.io/rb/keycloak_rails.svg)](https://badge.fury.io/rb/keycloak_rails)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Ruby Style Guide](https://img.shields.io/badge/code_style-rubocop-brightgreen.svg)](https://github.com/rubocop/rubocop)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
+[![unstable](http://badges.github.io/stability-badges/dist/unstable.svg)](http://github.com/badges/stability-badges)
+
+# KeycloakRails
+Keycloak_rails is an api wrapper for open source project [Keycloak](https://www.keycloak.org/)
+
+* the gem assumes that you have a configured and ready to use keycloak server
+* the gem is still in beta and the docs does not reflect the latest updates, multiple bugs might occur
+
+## Installation
+Add this line to your application's Gemfile:
+
+```ruby
+gem "keycloak_rails"
+```
+
+And then execute:
+```bash
+$ bundle
+```
+
+Or install it yourself as:
+```bash
+$ gem install keycloak_rails
+```
+
+## Getting started
+to generate keycloak_rails initializer execute:
+```bash
+$ bundle exec rails g keycloak_rails:config
+```
+ 
+go to `config/initializers/keycloak_rails.rb`
+
+where you will find 
+```ruby
+# frozen_string_literal: true
+
+# Keycloak Rails initializer
+
+KeycloakRails.configure do |config|
+  ####################################################
+  # Rails app controllers to manage auth
+  # config.sessions_controller = 'sessions'
+  # config.registrations_controller = 'registrations'
+  # config.unlocks_controller = 'unlocks'
+  # config.passwords_controller = 'passwords'
+  # config.omniauth_controller = 'omniauth'
+  ####################################################
+  # keyclaok rails need your user model name
+  # config.user_model = 'user'
+  ####################################################
+  # Auth server info
+  # config.auth_server_url = ''
+  # config.realm = 'realm'
+  # config.public_key = "public_key"
+  # config.secret = ''
+  # config.client_id = 'client_id'
+  ####################################################
+end
+```
+uncomment config options and enter your apps info
+
+**Note** do not uncomment controller config if you just want to use keycloak_rails user/client helpers
+
+## use
+### with controller helpers
+if you decided to use all of keycloak rails functionallity (pass controller options) keycloack rails will automatically hook up to named controllers and extend the base classes with our controller concerns which will provide the following methods
+#### KeycloakRails::Controller::Helpers
+***
+This concern will be inherited by all controllers as it extends application controller
+
+the following helpers will be added to your app 
+```ruby
+ensure_active_session # redirects to root if user not logged in
+ensure_no_active_session # redirects to root if user is logged in
+current_user # returns current user by session cookie
+user_has_active_sso_session? # returns true if current user has an active session in auth server
+```
+
+#### KeycloakRails::Controller::Sessions
+***
+extends the controller passed to `KeycloakRails.config.sessions_controller`
+
+In your app 
+
+
+`keycloak_rails.rb`
+```ruby
+KeycloakRails.configure do |config|
+   config.sessions_controller = 'sessions'
+end
+```
+
+`app/controllers/sessions_controller.rb`
+```ruby
+class SessionsController < ApplicationController
+  skip_before_action :ensure_active_session, only: %i[new log_in]
+  before_action :ensure_no_active_session, only: %i[new log_in]
+
+  def new; end
+
+  def log_in
+    start_sso_session(params[:email], params[:password])
+    # keycloak_rails will take care of setting the session cookie & current_user for you
+  end
+
+  def log_out
+    end_sso_session
+  end
+end
+```
+
+
+#### KeycloakRails::Controller::Registrations
+***
+The main idea behind keycloak_rails is to make adding sso easy to an existing rails app thats already in prod, and the registrations module is the backbone to achive that.
+
+In your app 
+
+
+`keycloak_rails.rb`
+```ruby
+KeycloakRails.configure do |config|
+   config.registrations_controller = 'registrations'
+end
+```
+
+`app/controllers/registrations_controller.rb`
+```ruby
+class RegistrationsController < ApplicationController
+  skip_before_action :ensure_active_session, only: %i[new create_user]
+  before_action :ensure_no_active_session, only: %i[new create_user]
+  
+  def new; end
+
+  def sign_up
+    sso_user = create_sso_user(email: params[:email], password: params[:password],
+                               first_name: params[:first_name], last_name: params[:last_name])
+    user = User.create!(sso_user)
+    # sso_user = { sso_sub: user_keycloak_sub, 
+    #              email: params[:email], 
+    #              first_name: params[:first_name], 
+    #              last_name: params[:last_name] }
+    # as shown above the sso_sub returned from will need to be added to the DB user record
+    # the sso sub is a uniqe identifier generated by keycloak auth server
+    # it can be used to link multiple apps together
+    if user
+      render json: user
+    else 
+      render json: user.errors
+    end
+  end
+  
+  
+end
+```
+
+#### KeycloakRails::Controller::Passwords
+***
+#### KeycloakRails::Controller::Unlocks
+***
+#### KeycloakRails::Controller::Omniauth
+***
+
+### without controller helpers
+#### KeycloakRails::User
+
+#### KeycloakRails::Client
+
+## Contributing
+refer to [CONTRIBUTING.md](https://github.com/Laborocity/keycloak_rails/blob/main/CONTRIBUTING.md) .
+
+## License
+The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+
