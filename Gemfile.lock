@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    keycloak_rails (1.0.0.pre.beta.6.1)
+    keycloak_rails (1.0.0)
       dry-configurable (~> 0.16)
       faraday (>= 2.0.0)
       jwt (>= 2.4)
@@ -209,6 +209,7 @@ GEM
 PLATFORMS
   x86_64-darwin-20
   x86_64-darwin-21
+  x86_64-linux
 
 DEPENDENCIES
   debug (>= 1.0.0)
@@ -220,4 +221,4 @@ DEPENDENCIES
   sqlite3
 
 BUNDLED WITH
-   2.3.25
+   2.4.8

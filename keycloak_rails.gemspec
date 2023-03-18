@@ -7,8 +7,8 @@ Gem::Specification.new do |spec|
   spec.version     = KeycloakRails::VERSION
   spec.required_ruby_version = '>= 2.6.0'
   spec.authors     = ['Omar Luqman']
-  spec.email       = ['oluqman@nucleushealthcare.com']
-  spec.homepage    = 'https://github.com/Laborocity/keycloak_rails'
+  spec.email       = ['omaralanii@outlook.com']
+  spec.homepage    = 'https://github.com/omarluq/keycloak_rails'
   spec.summary     = '%q{API wrapper for Key Cloak SSO server.}'
   spec.description = 'A rails wrapper for open source SSO project Keycloak.'
   spec.license     = 'MIT'
